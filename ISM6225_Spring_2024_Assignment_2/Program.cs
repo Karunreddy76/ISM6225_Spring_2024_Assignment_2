@@ -48,13 +48,13 @@ namespace ISM6225_Spring_2024_Assignment_2
 
             //Question 6:
             Console.WriteLine("Question 6:");
-            int[] nums5 = { 3,6,9,1 };
+            int[] nums5 = { 3, 6, 9, 1 };
             int maxGap = MaximumGap(nums5);
             Console.WriteLine(maxGap);
 
             //Question 7:
             Console.WriteLine("Question 7:");
-            int[] nums6 = { 2,1,2 };
+            int[] nums6 = { 2, 1, 2 };
             int largestPerimeterResult = LargestPerimeter(nums6);
             Console.WriteLine(largestPerimeterResult);
 
@@ -99,14 +99,26 @@ namespace ISM6225_Spring_2024_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return 0;
+                if (nums.Length == 0)
+                    return 0;
+
+                int i = 0; // Pointer for placing the next unique element
+                for (int j = 1; j < nums.Length; j++)
+                {
+                    if (nums[j] != nums[i])
+                    {
+                        i++;
+                        nums[i] = nums[j];
+                    }
+                }
+                return i + 1; // Length of array without duplicates
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         /*
         
@@ -134,14 +146,26 @@ namespace ISM6225_Spring_2024_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return new List<int>();
+                int lastNonZeroFoundAt = 0;
+                for (int i = 0; i < nums.Length; i++)
+                {
+                    if (nums[i] != 0)
+                    {
+                        // Swap elements nums[i] and nums[lastNonZeroFoundAt]
+                        int temp = nums[i];
+                        nums[i] = nums[lastNonZeroFoundAt];
+                        nums[lastNonZeroFoundAt] = temp;
+                        lastNonZeroFoundAt++;
+                    }
+                }
+                return nums;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         /*
 
@@ -185,14 +209,44 @@ namespace ISM6225_Spring_2024_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return new List<IList<int>>();
+                Array.Sort(nums);
+                IList<IList<int>> result = new List<IList<int>>();
+
+                for (int i = 0; i < nums.Length - 2; i++)
+                {
+                    if (i > 0 && nums[i] == nums[i - 1]) continue; // Skip same elements to avoid duplicates
+
+                    int left = i + 1, right = nums.Length - 1;
+                    while (left < right)
+                    {
+                        int sum = nums[i] + nums[left] + nums[right];
+                        if (sum == 0)
+                        {
+                            result.Add(new List<int> { nums[i], nums[left], nums[right] });
+                            while (left < right && nums[left] == nums[left + 1]) left++; // Skip same elements
+                            while (left < right && nums[right] == nums[right - 1]) right--; // Skip same elements
+                            left++;
+                            right--;
+                        }
+                        else if (sum < 0)
+                        {
+                            left++;
+                        }
+                        else
+                        {
+                            right--;
+                        }
+                    }
+                }
+
+                return result;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         /*
 
@@ -220,14 +274,30 @@ namespace ISM6225_Spring_2024_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return 0;
+                int maxCount = 0;
+                int currentCount = 0;
+
+                foreach (int num in nums)
+                {
+                    if (num == 1)
+                    {
+                        currentCount++;
+                        maxCount = Math.Max(maxCount, currentCount);
+                    }
+                    else
+                    {
+                        currentCount = 0;
+                    }
+                }
+
+                return maxCount;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         /*
 
@@ -256,14 +326,27 @@ namespace ISM6225_Spring_2024_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return 0;
+                string binaryStr = binary.ToString();
+                int decimalValue = 0;
+                int baseValue = 1; // Represents 2^0 initially and will be squared in each step
+
+                for (int i = binaryStr.Length - 1; i >= 0; i--)
+                {
+                    if (binaryStr[i] == '1')
+                    {
+                        decimalValue += baseValue;
+                    }
+                    baseValue *= 2; // Equivalent to 2^i where i is the current bit's position from the right
+                }
+
+                return decimalValue;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         /*
 
@@ -294,14 +377,48 @@ namespace ISM6225_Spring_2024_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return 0;
+                if (nums.Length < 2)
+                    return 0;
+
+                int min = nums.Min();
+                int max = nums.Max();
+
+                int bucketSize = Math.Max(1, (max - min) / (nums.Length - 1));
+                int bucketCount = (max - min) / bucketSize + 1;
+
+                List<int>[] bucketsMin = new List<int>[bucketCount];
+                List<int>[] bucketsMax = new List<int>[bucketCount];
+
+                foreach (int num in nums)
+                {
+                    int bucketIndex = (num - min) / bucketSize;
+                    bucketsMin[bucketIndex] = bucketsMin[bucketIndex] ?? new List<int>();
+                    bucketsMax[bucketIndex] = bucketsMax[bucketIndex] ?? new List<int>();
+                    bucketsMin[bucketIndex].Add(num);
+                    bucketsMax[bucketIndex].Add(num);
+                }
+
+                int previousMax = int.MaxValue, maxGap = 0;
+                for (int i = 0; i < bucketCount; i++)
+                {
+                    if (bucketsMin[i] != null && previousMax != int.MaxValue)
+                    {
+                        maxGap = Math.Max(maxGap, bucketsMin[i].Min() - previousMax);
+                    }
+                    if (bucketsMax[i] != null)
+                    {
+                        previousMax = bucketsMax[i].Max();
+                    }
+                }
+
+                return maxGap;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         /*
 
@@ -334,7 +451,21 @@ namespace ISM6225_Spring_2024_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
+                // Sort the array in non-ascending order
+                Array.Sort(nums);
+                Array.Reverse(nums);
+
+                for (int i = 0; i < nums.Length - 2; i++)
+                {
+                    // Check if the triplet forms a valid triangle
+                    if (nums[i] < nums[i + 1] + nums[i + 2])
+                    {
+                        // If it forms a triangle, return the perimeter
+                        return nums[i] + nums[i + 1] + nums[i + 2];
+                    }
+                }
+
+                // If no valid triangle is found, return 0
                 return 0;
             }
             catch (Exception)
@@ -342,6 +473,7 @@ namespace ISM6225_Spring_2024_Assignment_2
                 throw;
             }
         }
+
 
         /*
 
@@ -388,14 +520,22 @@ namespace ISM6225_Spring_2024_Assignment_2
         {
             try
             {
-                // Write your code here and you can modify the return value according to the requirements
-                return "";
+                // Continuously remove occurrences of 'part' from 's'
+                int index = s.IndexOf(part);
+                while (index != -1)
+                {
+                    s = s.Remove(index, part.Length);
+                    index = s.IndexOf(part);
+                }
+
+                return s;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         /* Inbuilt Functions - Don't Change the below functions */
         static string ConvertIListToNestedList(IList<IList<int>> input)
